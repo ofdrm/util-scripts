@@ -1,0 +1,65 @@
+#!/bin/bash
+# https://kvz.io/bash-best-practices.html
+
+# exit when failure in command
+# set -e
+# set -o errexit
+
+# exit when script tries to use unset variables
+# set -u
+# set -o nounset
+
+# exit when piping fails
+# set -o pipefail
+
+# Set magic variables for current file & dir
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+__file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
+__base="$(basename ${__file} .sh)"
+__root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
+
+arg1="${1:-}"
+
+if [[ -z $1 ]]; then
+	echo "provide full path to root directory as input param"
+	exit 1
+fi
+
+cd "$1"
+for dir in $(ls -d *); do
+		echo ">>>> processing $dir"
+		cd "$dir"
+		echo ">>>> pwd: $(pwd)"
+
+		git remote remove origin && git remote add origin "git@github.com-dmallicksf:twistcg/$dir" 
+
+		if [[ $? -ne 0 ]]; then
+			echo "error creating origin, fix this before proceeding"
+			exit 1
+		fi
+
+		git push origin master
+
+		if [[ $? -ne 0 ]]; then
+				echo ">>>>>>> git push origin master was not successful, trying develop branch"
+				read -n 1 -s -r -p "press any key to continue..."
+				git push origin develop
+
+
+				if [[ $? -ne 0 ]]; then
+						echo ">>>>>>> git push origin develop was not successful, trying dev branch"
+						read -n 1 -s -r -p "press any key to continue..."
+						git push origin dev
+
+						if [[ $? -ne 0 ]]; then
+							echo ">>>>>>> git push origin dev was not successful, trying DEV branch"
+							read -n 1 -s -r -p "press any key to continue..."
+							git push origin DEV
+						fi
+				fi
+		fi
+
+		cd "$1"
+done
+
+cd -

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# this didn't work since there was no commit to push at HEAD^. idea here was same - to rectify a previous incorrect push to remote,
+# we wanted to force-push +HEAD
+
+for dir in *; do
+		echo "$dir"
+		git remote remove origin
+		git remote add origin "git@github.com-dmallicksf:twistcg/$dir"
+		git reset HEAD^
+		git push origin +HEAD
+done

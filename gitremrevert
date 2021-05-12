@@ -1,0 +1,14 @@
+#!/bin/bash
+
+for dir in *; do
+		echo "$dir"
+		git remote remove origin
+		git remote add origin "git@github.com-dmallicksf:twistcg/$dir"
+		git push origin +HEAD^:master
+
+		if [[ $? -ne 0 ]]; then
+			echo ">>>>>>> git push origin master was not successful, trying develop branch"
+			read -n 1 -s -r -p "press any key to continue..."
+			git push origin develop
+		fi
+done

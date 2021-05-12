@@ -1,10 +1,6 @@
 #! /bin/bash
 
-log() {
-	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	echo "$1"
-	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-}
+. ../logging.sh
 
 if [[ -z "$1" ]]; then
 	log "./extract /path/to/root/dir/of/source"
@@ -12,14 +8,15 @@ if [[ -z "$1" ]]; then
 fi
 
 init() {
-		log "processing root source directory $1"
-		cd "$1"
 
-		for dir in *; do
-			process_dir "$dir"
-		done
+	log "now processing root source directory $1"
+	cd "$1"
 
-		cd -
+	for dir in *; do
+		process_dir "$dir"
+	done
+
+	cd -
 }
 
 process_file() {
@@ -34,13 +31,6 @@ process_file() {
 	log "ext: $ext"
 	log "unzipping $1"
 	unzip "$1"
-	log "creating .git"
-	mv "$file" ".git"
-	log "cloning .git"
-	git clone .git "$file"
-	log "removing .git"
-	rm -rf .git
-	log "done processing file $1"
 }
 
 process_dir() {

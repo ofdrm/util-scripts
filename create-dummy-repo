@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# create dummy repo with README so that we can push the HEAD forcefully to remote to rectify the previous incorrect push to remote
+
+cd "/Users/dmallick/twist-caas/schedule.2.1.d/Software/schedule-2.1.d/Off platform process"
+
+for dir in $(ls -d *); do
+	if [[ "$dir" == "ACPS_API_TA" ]]; then
+		echo ">>>> $dir already done"
+		continue
+	fi
+
+	echo "processing $dir"
+	mkdir -p "/Users/dmallick/twist-caas/tmp-backup-to-clean-remote/${dir}"
+	cd "/Users/dmallick/twist-caas/tmp-backup-to-clean-remote/${dir}" \
+		&& git init \
+		&& git remote add origin "git@github.com-dmallicksf:twistcg/${dir}" \
+		&& touch README \
+		&& git add . \
+		&& git commit -m "dummy" \
+		&& git push origin +HEAD	
+
+	if [[ $? -ne 0 ]]; then
+		echo ">>>>>> something failed, fix it, aborting..."
+		exit 1
+	fi
+
+	cd -
+done
+
+cd -
