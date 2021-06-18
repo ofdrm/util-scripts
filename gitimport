@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [[ -z "$1" ]]; then
+	echo "usage: /path/to/gitimport /path/to/file/with/repos/each/on/separate/line"
+	echo "since the repo path doesn't have any restriction, make sure you are running the script from a location from where"
+	echo "you can cd into the repo directory"
+	exit 1
+fi
+
+repofile="$1"
+homedir=`pwd`
+echo "repofile=$repofile, homedir=$homedir"
+
+while IFS= read -r line; do
+	if [[ "$line" =~ ^#.*$ ]]; then
+		echo "ignoring $line"
+		continue
+	fi
+	echo "processing $line"
+	dirname=`dirname "$line"`
+	filename=`basename "$line"`
+	echo "filename = $filename"
+	echo "dirname= $dirname"
+	cd "$dirname" && unzip "$filename" 
+	mv "$filename" .git && chmod -R u+x .git && mkdir "$filename" && cd "$filename" && mv ../.git .
+	sed -i '' -e 's/bare = true/bare = false/g' ./.git/config && git reset --hard && git remote add upstream git@github.com-dmallicksf:twistcg/${filename}.git && git checkout releases/v13 && git push upstream releases/v13
+	cd "$homedir"
+done < "$repofile"
