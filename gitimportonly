@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [[ -z "$1" ]]; then
+	echo "./gitimportonly /path/to/file/with/repo/names"
+	exit 1
+fi
+
+FILE="$1"
+echo "processing file: $FILE"
+
+while IFS= read -r line; do
+	if [[ "$line" =~ ^#.*$ ]]; then
+		echo "ignoring $line"
+		continue
+	fi
+	echo "processing repo: $line"
+	git clone git@github.com-dmallicksf:twistcg/${line}.git --depth 1
+done < $FILE
